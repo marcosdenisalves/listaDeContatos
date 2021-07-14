@@ -10,7 +10,6 @@ import com.everis.listadecontatos.bases.BaseActivity
 import com.everis.listadecontatos.feature.contato.ContatoActivity
 import com.everis.listadecontatos.feature.listacontatos.adapter.ContatoAdapter
 import com.everis.listadecontatos.feature.listacontatos.model.ContatosVO
-import com.everis.listadecontatos.singleton.ContatoSingleton
 import kotlinx.android.synthetic.main.activity_main.*
 
 
@@ -21,7 +20,6 @@ class MainActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        geraListaDeContatos()
         setupToolBar(toolBar, "Lista de contatos", false)
         setupListView()
         setupOnClicks()
@@ -34,19 +32,11 @@ class MainActivity : BaseActivity() {
 
     private fun setupListView() {
         recyclerView.layoutManager = LinearLayoutManager(this)
-        adapter = ContatoAdapter(this, ContatoSingleton.lista) { onClickItemRecyclerView(it) }
-        recyclerView.adapter = adapter
-    }
-
-    private fun geraListaDeContatos() {
-        ContatoSingleton.lista.add(ContatosVO(1, "Fulano", "(00) 9900-0001"))
-        ContatoSingleton.lista.add(ContatosVO(2, "Ciclano", "(00) 9900-0002"))
-        ContatoSingleton.lista.add(ContatosVO(3, "Vinicius", "(00) 9900-0001"))
     }
 
     override fun onResume() {
         super.onResume()
-        adapter?.notifyDataSetChanged()
+        onClickBuscar()
     }
 
     private fun onClickAdd() {
@@ -61,18 +51,18 @@ class MainActivity : BaseActivity() {
     }
 
     private fun onClickBuscar() {
-        val busca = etBuscar.text.toString()
+        val nome = etBuscar.text.toString()
         var listaFiltrada: List<ContatosVO> = mutableListOf()
         try {
             listaFiltrada =
-                ContatoApplication.instance.helperDB?.buscarContatos(busca) ?: mutableListOf()
+                ContatoApplication.instance.helperDB?.buscarContatos(false, arg = "$nome") ?: mutableListOf()
         } catch (ex: Exception) {
             ex.printStackTrace()
         }
 
         adapter = ContatoAdapter(this, listaFiltrada) { onClickItemRecyclerView(it) }
         recyclerView.adapter = adapter
-        Toast.makeText(this, "Buscando por $busca", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "Buscando por $nome", Toast.LENGTH_SHORT).show()
     }
 
 }

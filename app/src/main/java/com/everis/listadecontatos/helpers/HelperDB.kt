@@ -1,5 +1,6 @@
 package com.everis.listadecontatos.helpers
 
+import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
@@ -8,7 +9,6 @@ import com.everis.listadecontatos.feature.listacontatos.model.ContatosVO
 class HelperDB(
     context: Context?
 ) : SQLiteOpenHelper(context, NOME_BANCO, null, VERSAO_ATUAL) {
-
     companion object {
         private val NOME_BANCO = "contato.db"
         private val VERSAO_ATUAL = 1
@@ -36,19 +36,48 @@ class HelperDB(
         onCreate(db)
     }
 
-    fun buscarContatos(busca: String): List<ContatosVO> {
+    fun buscarContatos(isBuscaPorID: Boolean = false, arg: String): List<ContatosVO> {
         val db = readableDatabase ?: return mutableListOf()
         var lista = mutableListOf<ContatosVO>()
-        val sql = "SELECT * FROM $TABLE_NAME"
-        var cursor = db.rawQuery(sql, arrayOf()) ?: return mutableListOf()
-        while (cursor.moveToNext()) {
+        var args: Array<String> = arrayOf()
+        var where: String? = null
+
+        if (isBuscaPorID) {
+            where = "id = ?"
+            args = arrayOf(arg)
+        } else {
+            where = "nome LIKE ?"
+            args = arrayOf("%$arg%")
+        }
+        val queryResult = db.query(TABLE_NAME, null, where, args, null, null, null)
+
+        if (queryResult == null) {
+            db.close()
+            return mutableListOf()
+        }
+        while (queryResult.moveToNext()) {
             var contato = ContatosVO(
-                cursor.getInt(cursor.getColumnIndex("id")),
-                cursor.getString(cursor.getColumnIndex("nome")),
-                cursor.getString(cursor.getColumnIndex("telefone"))
+                queryResult.getInt(queryResult.getColumnIndex("id")),
+                queryResult.getString(queryResult.getColumnIndex("nome")),
+                queryResult.getString(queryResult.getColumnIndex("telefone"))
             )
             lista.add(contato)
         }
+        db.close()
         return lista
+    }
+
+    fun salvarContato(contato: ContatosVO) {
+        var list = buscarContatos(false, "")
+        list.forEach {
+            if (contato.nome == it.nome)
+                return
+        }
+        val db = writableDatabase ?: return
+        var content = ContentValues()
+        content.put("nome", contato.nome)
+        content.put("telefone", contato.telefone)
+        db.insert("contato", null, content)
+        db.close()
     }
 }
