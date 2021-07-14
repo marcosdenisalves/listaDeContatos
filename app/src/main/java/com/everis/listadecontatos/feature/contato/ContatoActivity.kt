@@ -12,7 +12,7 @@ import kotlinx.android.synthetic.main.activity_contato.toolBar
 
 class ContatoActivity : BaseActivity() {
 
-    private var index: Int = -1
+    private var idContato: Int = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,12 +23,12 @@ class ContatoActivity : BaseActivity() {
     }
 
     private fun setupContato() {
-        index = intent.getIntExtra("index", -1)
-        if (index == -1) {
+        idContato = intent.getIntExtra("index", -1)
+        if (idContato == -1) {
             btnExcluirContato.visibility = View.GONE
             return
         }
-        var lista = ContatoApplication.instance.helperDB?.buscarContatos(true, "$index") ?: return
+        var lista = ContatoApplication.instance.helperDB?.buscarContatos(true, "$idContato") ?: return
         var contato = lista.getOrNull(0) ?: return
         etNome.setText(contato.nome)
         etTelefone.setText(contato.telefone)
@@ -42,7 +42,7 @@ class ContatoActivity : BaseActivity() {
             nome,
             telefone
         )
-        if (index == -1) {
+        if (idContato == -1) {
             ContatoApplication.instance.helperDB?.salvarContato(contato)
         } else {
 //            ContatoSingleton.lista.set(index,contato)
@@ -51,8 +51,8 @@ class ContatoActivity : BaseActivity() {
     }
 
     fun onClickExcluirContato(view: View) {
-        if (index > -1) {
-            ContatoSingleton.lista.removeAt(index)
+        if (idContato > -1) {
+            ContatoApplication.instance.helperDB?.deletaContato(idContato)
             finish()
         }
     }

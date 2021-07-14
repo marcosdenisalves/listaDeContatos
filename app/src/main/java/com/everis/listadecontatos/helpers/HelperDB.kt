@@ -80,4 +80,12 @@ class HelperDB(
         db.insert("contato", null, content)
         db.close()
     }
+
+    fun deletaContato(id: Int) {
+        val db = writableDatabase ?: return
+        val where = "id = ?"
+        val args = arrayOf("$id")
+        db.delete(TABLE_NAME, where, args)
+        db.close()
+    }
 }
