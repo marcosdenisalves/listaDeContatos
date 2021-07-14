@@ -26,11 +26,7 @@ class ContatoAdapter(
         with(holder.itemView){
             tvNome.text = contato.nome
             tvTelefone.text = contato.telefone
-<<<<<<< HEAD
             llItem.setOnClickListener { onClick(contato.id!!) }
-=======
-            llItem.setOnClickListener { onClick(contato.id) }
->>>>>>> 7dcb7d516eceea2031d7ff0bef80d085661ff03e
         }
     }
 
